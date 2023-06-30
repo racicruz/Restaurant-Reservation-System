@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+import Reservation from "./Reservation";
+import DateNavigation from "./DateNavigation";
 
 /**
  * Defines the dashboard page.
@@ -9,28 +11,48 @@ import ErrorAlert from "../layout/ErrorAlert";
  * @returns {JSX.Element}
  */
 function Dashboard({ date }) {
-  const [reservations, setReservations] = useState([]);
-  const [reservationsError, setReservationsError] = useState(null);
+  //State Variables
+  const [reservations, setReservations] = useState([]); //Stores the reservations
+  const [reservationsError, setReservationsError] = useState(null); //Stores any errors related to reservations
 
+  //effect hook to load reservations when the date changes
   useEffect(loadDashboard, [date]);
 
+  //function to load reservations for the selected date
   function loadDashboard() {
     const abortController = new AbortController();
-    setReservationsError(null);
+    setReservationsError(null); //clear any previous error
+
+    //fetches reservations from the API using the passed in date
     listReservations({ date }, abortController.signal)
-      .then(setReservations)
-      .catch(setReservationsError);
-    return () => abortController.abort();
+      .then(setReservations)//update reservation state
+      .catch(setReservationsError); //set an error if the API request fails
+    return () => abortController.abort(); // Cleanup function to abort the API request if the component unmounts or the effect runs again
   }
+
+  //makes a list of Reservation components using the data in reservations
+  const reservationList = reservations.map(reservation => (
+    <Reservation 
+      key={reservation.reservation_id}
+      reservation={reservation}
+    />
+  ));
 
   return (
     <main>
-      <h1>Dashboard</h1>
-      <div className="d-md-flex mb-3">
-        <h4 className="mb-0">Reservations for date</h4>
+      <div className="text-center mt-3 mb-5">
+        <h1>Dashboard</h1>
+        <DateNavigation date={date} /> {/* renders the DateNavigation component and pass the date in to be used */}
       </div>
-      <ErrorAlert error={reservationsError} />
-      {JSON.stringify(reservations)}
+      <ErrorAlert error={reservationsError} /> {/* renders an error alert if there is a reservations error */}
+      <div className="container">
+        <div className="row">
+          <div className="col col-sm">
+            <h4 className="mb-4 text-center">Reservations for: {date}</h4>
+            {reservationList} {/* renders the list of Reservation components */}
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
