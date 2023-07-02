@@ -60,10 +60,28 @@ const NewReservation = () => {
         //reset the form errors
         setFormErrors([]);
 
+        const reservationDate = new Date(
+            `${formData.reservation_date}T${formData.reservation_time}:00`
+        );
+
         const errors = [];
         
         //form validation
         if(!event.target.checkValidity()) event.target.classList.add("was-validated");
+
+        //check if reservation date is on a tuesday, if yes throw error
+        if(reservationDate.getDay() === 2) {
+            errors.push({
+                message: `Restaurant is closed on Tuesdays. Sorry!`
+            });
+        }
+        
+        //check if date of reservation is valid/in future
+        if(Date.parse(reservationDate) < Date.now()){
+            errors.push({
+                meesage: `Bookings must be for a future date or time`
+            });
+        }
         
         //check if number of people is valid
         if (formData.people < 1) {
