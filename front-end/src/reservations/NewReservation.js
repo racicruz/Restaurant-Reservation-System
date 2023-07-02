@@ -64,6 +64,8 @@ const NewReservation = () => {
             `${formData.reservation_date}T${formData.reservation_time}:00`
         );
 
+        const [hours, minutes] = formData.reservation_time.split(':');
+
         const errors = [];
         
         //form validation
@@ -80,6 +82,20 @@ const NewReservation = () => {
         if(Date.parse(reservationDate) < Date.now()){
             errors.push({
                 meesage: `Bookings must be for a future date or time`
+            });
+        }
+
+        //check if time of reservation is before 10:30 AM
+        if((hours <= 10 && minutes < 30) || hours <= 9) {
+            errors.push({
+                message: `Restaurant hours are between 9:30 am - 10:30 pm. Please set your reservation to a time within those hours`
+            });
+        }
+
+        //check if time of reservation is past 9:30 PM
+        if((hours >= 21 && minutes > 30) || hours >= 22){
+            errors.push({
+                message: `Bookings are not accepted past 9:30 pm. Please make your reservation earlier`
             });
         }
         
