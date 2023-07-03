@@ -28,7 +28,21 @@ function create(reservation) {
         .then(createdRecords => createdRecords[0]);
 }
 
+/**
+*  Retrieves a reservation from the database based on the given reservation ID.
+* @param {number} reservation_id - The ID of the reservation to retrieve.
+* @returns {Promise<Object|null>} A promise that resolves to the retrieved reservation object, or null if not found.
+*/
+
+function read(reservation_id) {
+    return knex("reservations")
+        .select()
+        .where({ reservation_id })
+        .first();
+}
+
 module.exports = {
     list,
     create,
+    read
 }

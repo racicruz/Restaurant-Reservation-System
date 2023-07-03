@@ -11,7 +11,6 @@ const REQUIRED_PROPERTIES = [
   "people"
 ];
 
-
 /**
  * Validates the properties of a reservation request.
  * @param {Request} req - Express request object.
@@ -21,11 +20,13 @@ const REQUIRED_PROPERTIES = [
  */
 
 async function validateProperties(req, res, next) {
+  // Extract the required properties from res.locals
   const {
     data: { reservation_date, reservation_time, people },
   } = res.locals;
   try {
 
+    // Validate reservation_date format
     if(!validateDate(reservation_date)) {
       const error = new Error(
         `'${reservation_date}' is invalid 'reservation_date' format. Use YYY-MM-DD`
@@ -34,6 +35,7 @@ async function validateProperties(req, res, next) {
       throw error;
     }
 
+    // Validate reservation_time format
     if(!validateTime(reservation_time)) {
       const error = new Error(
         `'${reservation_time}' is invalid 'reservation_time' format. Use HH:MM:SS`
@@ -42,12 +44,14 @@ async function validateProperties(req, res, next) {
       throw error;
     }
 
+    // Validate people is a number
     if(typeof people !== "number") {
       const error = new Error(`people must be a number`);
       error.status = 400;
       throw error;
     }
 
+    // Validate people is at least 1
     if (people < 1) {
       const error = new Error(`people must be at least 1`);
       error.status = 400;
@@ -86,7 +90,7 @@ function validateTime(time) {
 }
 
 /**
- * Validates the reservation time.
+ * Validates the reservation date.
  * @param {Request} req - Express request object.
  * @param {Response} res - Express response object.
  * @param {NextFunction} next - Next function to pass control to the next middleware.
@@ -120,7 +124,7 @@ function validateReservationDate(req, res, next) {
 }
 
 /**
- * Retrieves a list of reservations for a given date.
+ * Retrieves a list of reservations for a given time.
  * @param {Request} req - Express request object.
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} - A promise that resolves when the response is sent.
@@ -153,11 +157,31 @@ function validateReservationTime(req, res, next) {
 }
 
 /**
- * Creates a new reservation.
- * @param {Request} req - Express request object.
- * @param {Response} res - Express response object.
- * @returns {Promise<void>} - A promise that resolves when the response is sent.
- */
+* Checks if a reservation exists.
+* @param {Request} req - Express request object.
+* @param {Response} res - Express response object.
+* @param {NextFunction} next - Next function to pass control to the next middleware.
+* @returns {void}
+*/
+
+async function reservationExists(req, res, next) {
+  const reservation = await service.read(req.params.reservation_id);
+  if (reservation) {
+    res.locals.reservation = reservation;
+    return next();
+  }
+  return next({
+    status: 404,
+    message: `Reservation was not found : ${req.params.reservation_id}`,
+  });
+}
+
+/**
+* Retrieves a list of reservations for a given date.
+* @param {Request} req - Express request object.
+* @param {Response} res - Express response object.
+* @returns {Promise<void>} - A promise that resolves when the response is sent.
+*/
 
 async function list(req, res) {
   const today = new Date().toLocaleDateString().replaceAll("/", "-");
@@ -171,9 +195,31 @@ async function list(req, res) {
   });
 }
 
+/**
+ * Creates a new reservation.
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} - A promise that resolves when the response is sent.
+ */
+
 async function create(req, res) {
   const data = await service.create(res.locals.data);
   res.status(201).json({ data });
+}
+
+/**
+* Retrieves a single reservation by reservation_id.
+* @param {Request} req - Express request object.
+* @param {Response} res - Express response object.
+* @returns {Promise<void>} - A promise that resolves when the response is sent.
+*/
+
+async function read(req, res) {
+  const { reservation_id } = req.params;
+  const data = await service.read(reservation_id);
+  res.json({
+    data,
+  });
 }
 
 module.exports = {
@@ -185,4 +231,8 @@ module.exports = {
     validateReservationTime,
     asyncErrorBoundary(create),
   ],
+  read: [
+    asyncErrorBoundary(reservationExists),
+    asyncErrorBoundary(read)
+  ]
 };
