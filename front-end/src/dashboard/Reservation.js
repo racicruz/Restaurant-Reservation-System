@@ -3,11 +3,13 @@ import React from 'react';
 const Reservation = ({ reservation }) => {
     //destructure the reservation object
     const {
+      reservation_id,
       first_name,
       last_name,
       reservation_time,
       people,
       mobile_number,
+      status,
     } = reservation;
 
 
@@ -70,9 +72,21 @@ const Reservation = ({ reservation }) => {
             >
             </div>
 
+            
           </div>
         </div>
       </div>
+      {status === "booked" && (
+        <a
+          href={`/reservations/${reservation_id}/seat`}
+          role="button"
+          className="card-footer bg-primary text-decoration-none"
+        >
+          <h5 className="text-white text-center text-decoration-none mb-1">
+            Seat
+          </h5>
+        </a>
+      )}
     </div>
   );
 }

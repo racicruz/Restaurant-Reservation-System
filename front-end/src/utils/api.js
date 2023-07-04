@@ -80,7 +80,106 @@ export async function createReservation(data, signal) {
 
   return await fetchJson(
     url,
-    { headers, signal, method: "POST", body: JSON.stringify({ data }) },
+    { 
+      headers, 
+      signal, 
+      method: "POST", 
+      body: JSON.stringify({ data }) 
+    },
+    []
+  );
+}
+
+/**
+ * Retrieves a list of tables from the API.
+ *
+ * @param {AbortSignal} signal - An optional signal object that allows cancelling the request.
+ * @returns {Promise<Array>} A promise that resolves to an array of tables.
+ */
+
+export async function listTables(signal) {
+  const url = new URL(`${API_BASE_URL}/tables`);
+  return await fetchJson(
+    url, 
+    { 
+      headers, 
+      signal 
+    }, 
+    []
+  );
+}
+
+/**
+ * Creates a new table.
+ * @param {Object} data - The table data.
+ * @param {AbortSignal} signal - The abort signal for cancelling the request.
+ * @returns {Promise<Object>} - A promise that resolves to the created table.
+ */
+
+export async function createTable(data, signal) {
+  const url = new URL(`${API_BASE_URL}/tables`);
+  return await fetchJson(
+    url,
+    {
+      headers,
+      signal, 
+      method: 'POST',
+      body: JSON.stringify({ data })
+    },
+    []
+  );
+}
+
+/**
+ * Updates a table by seating a reservation.
+ * @param {string} reservation_id - The ID of the reservation to be seated.
+ * @param {string} table_id - The ID of the table to seat the reservation.
+ * @param {AbortSignal} signal - The abort signal for cancelling the request.
+ * @returns {Promise<Array>} - A promise that resolves to an array of results.
+ */
+
+export async function updateTable(reservation_id, table_id, signal) {
+  const tableUrl = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
+
+  const promises = [
+    fetchJson(
+      tableUrl,
+      {
+        headers,
+        signal,
+        method: "PUT",
+        body: JSON.stringify({
+          data: {
+            reservation_id,
+          },
+        }),
+      },
+      []
+    )
+  ];
+
+  return await Promise.all(promises);
+}
+
+
+/**
+ * Unseats a table by removing a seated reservation.
+ * @param {string} table_id - The ID of the table to unseat.
+ * @param {AbortSignal} signal - The abort signal for cancelling the request.
+ * @returns {Promise<Object>} - A promise that resolves to the unseated table.
+ */
+
+export async function unseatTable(table_id, signal) {
+  const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
+
+  return await fetchJson(
+    url,
+    {
+      headers,
+      signal,
+      method: "DELETE",
+      body: JSON.stringify({ data: { table_id } })
+    },
     []
   );
 }
