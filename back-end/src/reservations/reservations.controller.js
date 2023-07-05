@@ -184,7 +184,7 @@ async function reservationExists(req, res, next) {
 */
 
 async function list(req, res) {
-  const today = new Date().toLocaleDateString().replaceAll("/", "-");
+  const today = new Date().toLocaleDateString().split('/').join('-');
   const { date = today } = req.query;
   let reservations;
   if (date) {
