@@ -22,7 +22,7 @@ const REQUIRED_PROPERTIES = [
 async function validateProperties(req, res, next) {
   // Extract the required properties from res.locals
   const {
-    data: { reservation_date, reservation_time, people },
+    data: { reservation_date, reservation_time, people, status },
   } = res.locals;
   try {
 
@@ -54,6 +54,13 @@ async function validateProperties(req, res, next) {
     // Validate people is at least 1
     if (people < 1) {
       const error = new Error(`people must be at least 1`);
+      error.status = 400;
+      throw error;
+    }
+
+    // Validate if status is booked
+    if (status && status !== 'booked') {
+      const error = new Error(`status must be "booked", received: ${status}`);
       error.status = 400;
       throw error;
     }
@@ -177,6 +184,52 @@ async function reservationExists(req, res, next) {
 }
 
 /**
+ * Checks if a reservation is not finished.
+ * If the reservation is finished, it calls the `next` middleware with an error.
+ * Otherwise, it calls the `next` middleware.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {void}
+ */
+
+async function notFinished(req, res, next) {
+  const { status } = res.locals.reservation;
+  if (status === 'finished') {
+    return next({
+      status: 400,
+      message: 'a finished reservation cannot be updated',
+    });
+  }
+  next();
+}
+
+/**
+ * Validates the status of a reservation.
+ * If the status is valid, it calls the `next` middleware.
+ * Otherwise, it calls the `next` middleware with an error.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {void}
+ */
+
+async function validStatus(req, res, next) {
+  const validStatusList = ['booked', 'seated', 'finished', 'cancelled'];
+  const { status } = req.body.data;
+  if (status && validStatusList.includes(status)) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Invalid Status: ${status}`,
+    });
+  }
+}
+
+/**
 * Retrieves a list of reservations for a given date.
 * @param {Request} req - Express request object.
 * @param {Response} res - Express response object.
@@ -222,6 +275,25 @@ async function read(req, res) {
   });
 }
 
+/**
+ * Updates the status of a reservation.
+ *
+ * @param {Object} req - The request object containing the reservation ID and updated data.
+ * @param {number} req.params.reservation_id - The ID of the reservation to be updated.
+ * @param {Object} req.body.data - The updated data, including the new status.
+ * @returns {Promise<void>} - A Promise that resolves once the status is updated and the response is sent.
+ */
+
+async function updateStatus(req, res) {
+  const data = await service.updateStatus(
+    req.params.reservation_id,
+    req.body.data
+  );
+  res.json({
+    data,
+  });
+}
+
 module.exports = {
   list: asyncErrorBoundary(list),
   create: [
@@ -234,5 +306,11 @@ module.exports = {
   read: [
     asyncErrorBoundary(reservationExists),
     asyncErrorBoundary(read)
+  ],
+  updateStatus: [
+    asyncErrorBoundary(reservationExists),
+    asyncErrorBoundary(notFinished),
+    asyncErrorBoundary(validStatus),
+    asyncErrorBoundary(updateStatus)
   ]
 };
