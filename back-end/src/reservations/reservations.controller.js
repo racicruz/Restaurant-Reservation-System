@@ -238,9 +238,11 @@ async function validStatus(req, res, next) {
 
 async function list(req, res) {
   const today = new Date().toLocaleDateString().split('/').join('-');
-  const { date = today } = req.query;
+  const { date = today, mobile_number } = req.query;
   let reservations;
-  if (date) {
+  if (mobile_number){
+    reservations = await service.search(mobile_number);
+  } else {
     reservations = await service.list(date);
   }
   res.json({
