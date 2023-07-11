@@ -9,7 +9,7 @@ const tables = require("./01-tables.json");
 
 //exporting the seed function
 exports.seed = function (knex) {
-  console.log("Seeding tables table...");
+  //console.log("Seeding tables table...");
   //truncate the "tables" table and restart the identity column
   return knex
     .raw("TRUNCATE TABLE tables RESTART IDENTITY CASCADE")

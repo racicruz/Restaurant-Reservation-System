@@ -82,10 +82,28 @@ function search(mobile_number) {
         .orderBy("reservation_date");
 }
 
+/**
+ * Updates a reservation in the database.
+ *
+ * @param {number} reservation_id - The ID of the reservation to be updated.
+ * @param {object} data - The updated data for the reservation.
+ * @returns {Promise<object>} - A Promise that resolves to the updated reservation object.
+ */
+
+function update(reservation_id, data) {
+    return knex('reservations')
+        .select()
+        .where({ reservation_id })
+        .update(data, '*')
+        .returning('*')
+        .then((reservationData) => reservationData[0]);
+}
+
 module.exports = {
     list,
     create,
     read,
     updateStatus,
     search,
+    update,
 }
