@@ -42,6 +42,7 @@ function Dashboard({ date }) {
     <Reservation 
       key={reservation.reservation_id}
       reservation={reservation}
+      loadDashboard={loadDashboard}
     />
   ));
 

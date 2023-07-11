@@ -183,3 +183,72 @@ export async function unseatTable(table_id, signal) {
     []
   );
 }
+
+/**
+ * Cancels a reservation by updating its status to "cancelled".
+ *
+ * @param {number} reservation_id - The ID of the reservation to be cancelled.
+ * @param {AbortSignal} signal - An optional AbortSignal object that allows cancelling the request.
+ * @returns {Promise<object>} - A Promise that resolves to the response data of the cancellation request.
+ */
+
+export async function cancelReservation(reservation_id, signal) {
+  const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}/status`);
+  return await fetchJson(
+    url,
+    {
+      headers,
+      signal,
+      method: "PUT",
+      body: JSON.stringify({
+        data: {
+          status: "cancelled",
+        },
+      }),
+    },
+    []
+  );
+}
+
+/**
+ * Retrieves the details of a specific reservation.
+ *
+ * @param {number} reservation_id - The ID of the reservation to retrieve.
+ * @param {AbortSignal} signal - An optional AbortSignal object that allows cancelling the request.
+ * @returns {Promise<object>} - A Promise that resolves to the response data of the reservation request.
+ */
+
+export async function readReservation(reservation_id, signal) {
+  const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}`)
+  return await fetchJson(
+    url, { 
+      headers, 
+      signal 
+    }, 
+    []
+  );
+}
+
+/**
+ * Updates a reservation with new data.
+ *
+ * @param {object} data - The updated data for the reservation.
+ * @param {number} reservation_id - The ID of the reservation to be updated.
+ * @param {AbortSignal} signal - An optional AbortSignal object that allows cancelling the request.
+ * @returns {Promise<object>} - A Promise that resolves to the response data of the update request.
+ */
+
+export async function updateReservation(data, reservation_id, signal) {
+  const url = new URL(`${API_BASE_URL}/reservations/${reservation_id}`);
+
+  return await fetchJson(
+    url,
+    {
+      headers,
+      signal, 
+      method: "PUT",
+      body: JSON.stringify({ data })
+    },
+    []
+  );
+}
