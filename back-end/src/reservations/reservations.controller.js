@@ -230,7 +230,7 @@ async function validStatus(req, res, next) {
 }
 
 /**
-* Retrieves a list of reservations for a given date.
+* Retrieves a list of reservations for a given phone number or date.
 * @param {Request} req - Express request object.
 * @param {Response} res - Express response object.
 * @returns {Promise<void>} - A promise that resolves when the response is sent.
