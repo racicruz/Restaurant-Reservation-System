@@ -1,6 +1,7 @@
 import React from 'react';
+import { cancelReservation } from '../utils/api';
 
-const Reservation = ({ reservation }) => {
+const Reservation = ({ reservation, loadDashboard }) => {
     //destructure the reservation object
     const {
       reservation_id,
@@ -12,6 +13,23 @@ const Reservation = ({ reservation }) => {
       status,
     } = reservation;
 
+    //handles cancel button
+    function handleClick() {
+      if (
+        window.confirm(
+          "Do you want to cancel this reservation?"
+        )
+      ) {
+        const abortController = new AbortController();
+
+        cancelReservation(reservation_id, abortController.signal)
+          .then(loadDashboard)
+          .catch((error) => console.log("error", error));
+        return () => abortController.abort();
+      }
+    }
+
+    //displays reservation status
     const statusElement = 
       status === "booked" ? (
         <div 
@@ -103,10 +121,26 @@ const Reservation = ({ reservation }) => {
             >
               {statusElement}
             </div>
+
+            {/* Edit and Cancel buttons */}
+            <div className='col col-8 card-text text-right d-flex justify-content-end pr-0'>
+              <a href={`/reservations/${reservation_id}/edit`}>
+                <button className='btn btn-secondary mr-2'>Edit</button>
+              </a>
+              <button
+                className='btn btn-danger'
+                data-reservation-id-cancel={reservation.reservation_id}
+                onClick={handleClick}
+              >
+                Cancel
+              </button>
+            </div>
             
           </div>
         </div>
       </div>
+
+      {/* Seat Button */}
       {status === "booked" && (
         <a
           href={`/reservations/${reservation_id}/seat`}

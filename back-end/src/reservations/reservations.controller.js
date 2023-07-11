@@ -296,6 +296,24 @@ async function updateStatus(req, res) {
   });
 }
 
+/**
+ * Updates a reservation and sends the updated data as JSON response.
+ *
+ * @param {Object} req - The request object containing the reservation ID and updated data.
+ * @param {Object} res - The response object used to send the JSON response.
+ * @returns {Promise<void>} - A Promise that resolves once the reservation is updated and the response is sent.
+ */
+
+async function update(req, res) {
+  const data = await service.update(
+    req.params.reservation_id,
+    req.body.data
+  )
+  res.json({
+    data,
+  });
+}
+
 module.exports = {
   list: asyncErrorBoundary(list),
   create: [
@@ -314,5 +332,11 @@ module.exports = {
     asyncErrorBoundary(notFinished),
     asyncErrorBoundary(validStatus),
     asyncErrorBoundary(updateStatus)
-  ]
+  ],
+  update: [
+    asyncErrorBoundary(reservationExists),
+    hasProperties(...REQUIRED_PROPERTIES),
+    asyncErrorBoundary(validateProperties),
+    asyncErrorBoundary(update)
+  ],
 };
