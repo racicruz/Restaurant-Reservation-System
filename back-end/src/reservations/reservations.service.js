@@ -15,7 +15,6 @@ function list(date) {
         .whereNot({ 'reservations.status': 'cancelled'})
         .orderBy("reservation_time");
 }
-  
 
 /**
  * Creates a new reservation.
@@ -62,9 +61,31 @@ function updateStatus(reservation_id, data) {
         .then((reservatioData) => reservatioData[0]);
 }
 
+/**
+ * Searches for reservations based on a mobile number.
+ *
+ * @param {string} mobile_number - The mobile number to search for.
+ * @returns {Promise<Array<Object>>} - A Promise that resolves to an array of matching reservation objects.
+ */
+
+function search(mobile_number) {
+    return knex("reservations")
+        .select()
+        .whereRaw(
+            //perform a pattern match on the mobile_number column.
+            //removes any characters other than digits from both the column value and the provided mobile_number
+            //then checks if the resulting value is contained within the mobile_number column
+            //allows for a flexible search by ignoring formatting differences
+            "translate(mobile_number, '() -', '') like ?",
+            `%${mobile_number.replace(/\D/g, '')}%`
+        )
+        .orderBy("reservation_date");
+}
+
 module.exports = {
     list,
     create,
     read,
     updateStatus,
+    search,
 }
