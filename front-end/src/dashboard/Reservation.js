@@ -12,6 +12,37 @@ const Reservation = ({ reservation }) => {
       status,
     } = reservation;
 
+    const statusElement = 
+      status === "booked" ? (
+        <div 
+          style={{ cursor: "default" }}
+          className='btn border border-success rounded text-success'
+        >
+          Booked
+        </div>
+      ) : status === "seated" ? (
+        <div 
+          style={{ cursor: "default" }}
+          className='btn border border-warning rounded text-warning'
+        >
+          Seated
+        </div>
+      ) : status === "cancelled" ? (
+        <div 
+          style={{ cursor: "default" }}
+          className='btn border border-danger rounded text-danger'
+        >
+          Cancelled
+        </div>
+      ) : (
+        <div 
+          style={{ cursor: "default" }}
+          className='btn border border-muted rounded text-muted'
+        >
+          Finished
+        </div>
+      );
+
 
     return (
     <div className="card mb-3 shadow-sm">
@@ -70,8 +101,8 @@ const Reservation = ({ reservation }) => {
               data-reservation-id-status={reservation.reservation_id}
               className="col card-text mb-0 pl-0"
             >
+              {statusElement}
             </div>
-
             
           </div>
         </div>
