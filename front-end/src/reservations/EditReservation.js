@@ -28,17 +28,21 @@ const EditReservation = () => {
     const { reservation_id } = useParams();
 
     //set current reservation information in formData
+    //FIXED
     useEffect(() => {
         async function loadReservation() {
             const abortController = new AbortController();
-            const reservation = await readReservation(
-                reservation_id,
-                abortController.signal
-            );
-            setFormData({ ...formatReservationDate(reservation) });
+            try {
+                const reservation = await readReservation(
+                    reservation_id,
+                    abortController.signal
+                );
+                setFormData({ ...formatReservationDate(reservation) });
+            } catch (error) {
+                console.error(error);
+            }
             return () => abortController.abort();
         }
-
         loadReservation();
     }, [reservation_id]);
 
@@ -133,8 +137,9 @@ const EditReservation = () => {
     }
 
     //render the error alerts based on form errors
-    let displayErrors = formErrors.map((error) => (
-        <ErrorAlert key={error} error={error} />
+    //FIXED
+    let displayErrors = formErrors.map((error, index) => (
+        <ErrorAlert key={index} error={error} />
       ));
 
     return (
